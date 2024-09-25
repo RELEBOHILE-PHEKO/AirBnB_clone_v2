@@ -1,53 +1,37 @@
 #!/usr/bin/python3
-"""This module contains the entry point of the command interpreter."""
-import cmd
-import re
+"""This module contains the entry point of the command interpreter."""import shlex
 from models import storage
 from models.base_model import BaseModel
 from models.user import User
+from models.place import Place
 from models.state import State
 from models.city import City
 from models.amenity import Amenity
-from models.place import Place
 from models.review import Review
-import shlex
 
 class HBNBCommand(cmd.Cmd):
-<<<<<<< HEAD
-    """ Contains the functionality for the HBNB console"""
+    """Command interpreter"""
+    prompt = "(hbnb) "
 
-    # determines prompt for interactive/non-interactive modes
-    prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
-
+    # Map of valid classes
     classes = {
-               'BaseModel': BaseModel, 'User': User, 'Place': Place,
-               'State': State, 'City': City, 'Amenity': Amenity,
-               'Review': Review
-              }
-    dot_cmds = ['all', 'count', 'show', 'destroy', 'update']
-    types = {
-             'number_rooms': int, 'number_bathrooms': int,
-             'max_guest': int, 'price_by_night': int,
-             'latitude': float, 'longitude': float
-            }
-
-    def preloop(self):
-        """Prints if isatty is false"""
-        if not sys.__stdin__.isatty():
-            print('(hbnb)')
-
-    def precmd(self, line):
-        """Executes before each command"""
-        return cmd.Cmd.precmd(self, line)
+        'BaseModel': BaseModel,
+        'User': User,
+        'Place': Place,
+        'State': State,
+        'City': City,
+        'Amenity': Amenity,
+        'Review': Review
+    }
 
     def do_create(self, arg):
-        """Creates a new instance of a class"""
+        """Creates a new instance of a class, with dynamic parameters"""
         args = shlex.split(arg)
-        
+
         if len(args) == 0:
             print("** class name missing **")
             return
-        
+
         class_name = args[0]
 
         if class_name not in HBNBCommand.classes:
@@ -57,105 +41,74 @@ class HBNBCommand(cmd.Cmd):
         # Create an instance of the class
         new_instance = HBNBCommand.classes[class_name]()
 
-        # Process the parameters
+        # Parsing key=value arguments
         for param in args[1:]:
-            key, value = self.parse_parameter(param)
-            if key and value:
-                setattr(new_instance, key, value)
-
-        # Save the new instance
-        new_instance.save()
-        print(new_instance.id)
-
-    def parse_parameter(self, param):
-        """Parse a single key=value parameter and return key, value"""
-        # Check if param follows key=value format
-        if '=' not in param:
-            return None, None
-        
-        key, value = param.split('=', 1)
-
-        # String: if it starts with a double quote, process as a string
-        if value.startswith('"') and value.endswith('"'):
-            value = value[1:-1].replace('_', ' ').replace('\\"', '"')
-
-        # Float: if it contains a dot, convert to float
-        elif '.' in value:
-            try:
-                value = float(value)
-            except ValueError:
-                return None, None
-
-        # Integer: if it's numeric, convert to int
-        elif value.isdigit():
-            try:
-                value = int(value)
-            except ValueError:
-                return None, None
-
-        else:
-            return None, None
-
-        return key, value
-
-    # Rest of the methods, e.g., do_show, do_destroy, etc., remain unchanged
-
-=======
-    """Command interpreter class"""
-
-    prompt = '(hbnb) '
-    __classes = {
-        "BaseModel": BaseModel,
-        "User": User,
-        "State": State,
-        "City": City,
-        "Amenity": Amenity,
-        "Place": Place,
-        "Review": Review
-    }
-
-    def do_create(self, arg):
-        """Creates a new instance of a class"""
-        args = arg.split()
-        if len(args) == 0:
-            print("** class name missing **")
-            return
-        if args[0] not in HBNBCommand.__classes:
-            print("** class doesn't exist **")
-            return
-        
-        new_instance = HBNBCommand.__classes[args[0]]()
-        
-        for param in args[1:]:
-            if '=' not in param:
+            if "=" not in param:
                 continue
-            key, value = param.split('=', 1)
-            
-            # Process the value based on its type
+
+            key, value = param.split("=", 1)
+
+            # Processing value
             if value.startswith('"') and value.endswith('"'):
-                # String value
-                value = value[1:-1].replace('_', ' ').replace('\\"', '"')
+                # String type: Remove surrounding quotes, replace underscores with spaces
+                value = value[1:-1].replace("_", " ")
+                value = value.replace('\\"', '"')  # Handle escaped quotes inside strings
             elif '.' in value:
-                # Float value
+                # Float type
                 try:
                     value = float(value)
                 except ValueError:
                     continue
             else:
-                # Integer value
+                # Integer type
                 try:
                     value = int(value)
                 except ValueError:
                     continue
-            
-            # Set the attribute
-            setattr(new_instance, key, value)
-        
+
+            # Dynamically set attributes for the new instance
+            if hasattr(new_instance, key):
+                setattr(new_instance, key, value)
+
+        # Save the instance and print the ID
         new_instance.save()
         print(new_instance.id)
 
-    # ... (other methods remain unchanged)
+    def do_show(self, arg):
+        """Show an instance based on the class and id"""
+        args = shlex.split(arg)
+        if len(args) < 2:
+            print("** class name or instance ID missing **")
+            return
 
-if __name__ == '__main__':
-    HBNBCommand().cmdloop()
+        class_name, instance_id = args[0], args[1]
+
+        if class_name not in HBNBCommand.classes:
+            print("** class doesn't exist **")
+            return
+
+        key = f"{class_name}.{instance_id}"
+        all_objs = storage.all()
+        obj = all_objs.get(key)
+
+        if obj:
+            print(obj)
+        else:
+            print("** no instance found **")
+
+    def do_all(self, arg):
+        """Prints all instances, or all instances of a specific class"""
+        args = shlex.split(arg)
+        all_objs = storage.all()
+
+        if len(args) == 0:
+            # Print all objects
+            print([str(obj) for obj in all_objs.values()])
+        elif args[0] in HBNBCommand.classes:
+            # Print objects of a specific class
+            print([str(obj) for key, obj in all_objs.items() if key.startswith(args[0])])
+        else:
+            print("** class doesn't exist **")
+
+# To be integrated with your existing command loop and storage system.
 
