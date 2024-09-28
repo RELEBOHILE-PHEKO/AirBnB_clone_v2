@@ -17,6 +17,7 @@ class DBStorage:
     """The class for database storage."""
     __engine = None
     __session = None
+    __objects = {}  # Temporary storage for testing purposes
 
     def __init__(self):
         """Initialize a new DBStorage instance."""
@@ -58,15 +59,19 @@ class DBStorage:
     def new(self, obj):
         """Add the object to the current database session."""
         self.__session.add(obj)
+        self.__objects[f"{type(obj).__name__}.{obj.id}"] = obj  # Track objects
 
     def save(self):
         """Commit all changes of the current database session."""
         self.__session.commit()
+        self.__objects.clear()  # Clear tracked objects after saving
 
     def delete(self, obj=None):
         """Delete from the current database session."""
         if obj:
             self.__session.delete(obj)
+            if f"{type(obj).__name__}.{obj.id}" in self.__objects:
+                del self.__objects[f"{type(obj).__name__}.{obj.id}"]  # Remove from tracked objects
 
     def reload(self):
         """Create all tables in the database and create a new session."""
