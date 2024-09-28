@@ -13,32 +13,22 @@ Base = declarative_base()
 
 
 class BaseModel:
-<<<<<<< HEAD
-
-
-
-   """A base class for all hbnb models"""
-== == == =
-   """A base class for all hbnb models."""
-=======
     """A base class for all hbnb models."""
->>>>>>> 2ec9c1e62690232c1ba42c32baf15fedc6c5f07c
 
     id = Column(String(60), primary_key=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
-
-   def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """Instantiate a new model."""
         self.id = str(uuid.uuid4())
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
+        
         if kwargs:
             for k, v in kwargs.items():
-                if k == 'created_at' or k == 'updated_at':
-                    setattr(self, k, datetime.strptime(v,
-                                                       '%Y-%m-%dT%H:%M:%S.%f'))
+                if k in ('created_at', 'updated_at'):
+                    setattr(self, k, datetime.strptime(v, '%Y-%m-%dT%H:%M:%S.%f'))
                 elif k != '__class__':
                     setattr(self, k, v)
 
@@ -46,13 +36,8 @@ class BaseModel:
         """Return a string representation of the instance."""
         cls = (str(type(self)).split('.')[-1]).split('\'')[0]
         filtered_dict = {
-            k: v for k, v in self.__dict__.copy().items()
-            if k != '_sa_instance_state'
-<<<<<<< HEAD
-            }
-=======
+            k: v for k, v in self.__dict__.copy().items() if k != '_sa_instance_state'
         }
->>>>>>> 2ec9c1e62690232c1ba42c32baf15fedc6c5f07c
         return '[{}] ({}) {}'.format(cls, self.id, filtered_dict)
 
     def save(self):
