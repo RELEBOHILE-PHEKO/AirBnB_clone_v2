@@ -13,17 +13,19 @@ Base = declarative_base()
 
 
 class BaseModel:
-<<<<<<< HEAD
-    """A base class for all hbnb models"""
-=======
-    """A base class for all hbnb models."""
+
+
+
+   """A base class for all hbnb models"""
+== == == =
+   """A base class for all hbnb models."""
 
     id = Column(String(60), primary_key=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
->>>>>>> 972c1b857d01cecddd10bd6520aec0c9bfae1fa7
 
-    def __init__(self, *args, **kwargs):
+
+   def __init__(self, *args, **kwargs):
         """Instantiate a new model."""
         self.id = str(uuid.uuid4())
         self.created_at = datetime.now()
@@ -40,9 +42,9 @@ class BaseModel:
         """Return a string representation of the instance."""
         cls = (str(type(self)).split('.')[-1]).split('\'')[0]
         filtered_dict = {
-                         k: v for k, v in self.__dict__.copy().items()
-                         if k != '_sa_instance_state'
-                         }
+            k: v for k, v in self.__dict__.copy().items()
+            if k != '_sa_instance_state'
+            }
         return '[{}] ({}) {}'.format(cls, self.id, filtered_dict)
 
     def save(self):
