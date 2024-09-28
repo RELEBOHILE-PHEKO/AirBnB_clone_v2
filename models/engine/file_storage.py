@@ -28,11 +28,11 @@ class FileStorage:
         Otherwise, returns the __objects dictionary.
         """
         if cls is not None:
-            if type(cls) == str:
-                cls = eval(cls)
+            if isinstance(cls, str):
+                cls = eval(cls)  # Consider replacing this with a safer alternative
             cls_dict = {}
             for k, v in self.__objects.items():
-                if type(v) == cls:
+                if isinstance(v, cls):
                     cls_dict[k] = v
             return cls_dict
         return self.__objects
@@ -54,7 +54,7 @@ class FileStorage:
                 for o in json.load(f).values():
                     name = o["__class__"]
                     del o["__class__"]
-                    self.new(eval(name)(**o))
+                    self.new(eval(name)(**o))  # Consider replacing eval() here as well
         except FileNotFoundError:
             pass
 
