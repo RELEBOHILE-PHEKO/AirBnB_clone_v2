@@ -1,41 +1,40 @@
 #!/usr/bin/python3
-"""
-Module for BaseModel class.
-"""
+"""This module defines a BaseModel class."""
 
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, DateTime
+from datetime import datetime
+import models
 import uuid
-import datetime
-
-Base = declarative_base()
 
 
-class BaseModel(Base):
-    """A base model that defines common attributes and methods for all models."""
-
-    __tablename__ = 'base_model'  # Example table name
-
-    id = Column(String(60), primary_key=True, default=str(uuid.uuid4()))
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow)
+class BaseModel:
+    """Base model for all models in the project."""
 
     def __init__(self, *args, **kwargs):
         """Initialize a new BaseModel instance."""
-        if not self.id:
+        if kwargs:
+            for key, value in kwargs.items():
+                if key != '__class__':
+                    setattr(self, key, value)
+        else:
             self.id = str(uuid.uuid4())
-        super().__init__(*args, **kwargs)  # Call parent class constructor
+            self.created_at = datetime.now()
+            self.updated_at = datetime.now()
 
     def save(self):
-        """Save the current instance to the database."""
+        """Update the updated_at attribute."""
+        self.updated_at = datetime.now()
         models.storage.new(self)
-        models.storage.save()
 
     def to_dict(self):
-        """Convert the object to a dictionary."""
-        return {c.name: getattr(self, c.name) for c in self.__class__.__table__.columns}
+        """Return a dictionary representation of the BaseModel."""
+        dict_representation = self.__dict__.copy()
+        dict_representation['created_at'] = self.created_at.isoformat()
+        dict_representation['updated_at'] = self.updated_at.isoformat()
+        dict_representation['__class__'] = self.__class__.__name__
+        return dict_representation
 
     def __str__(self):
-        """Return a string representation of the instance."""
-        return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
-
+        """Return a string representation of the BaseModel."""
+        return "[{}] ({}) {}".format(
+            self.__class__.__name__, self.id, self.__dict__
+        )
