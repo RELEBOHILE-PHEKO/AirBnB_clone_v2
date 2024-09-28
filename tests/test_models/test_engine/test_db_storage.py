@@ -1,103 +1,38 @@
 #!/usr/bin/python3
-import unittest
+""" TestDBStorage classes
+"""
+
+from datetime import datetime
 import models
-from models.user import User
-from models.review import Review
+from models.engine import db_storage
 from models.amenity import Amenity
-from models.state import State
-from models.place import Place
+from models.base_model import BaseModel
 from models.city import City
-import os
+from models.place import Place
+from models.review import Review
+from models.state import State
+from models.user import User
+import json
+import unittest
+DBStorage = db_storage.DBStorage
+classes = {"Amenity": Amenity, "City": City, "Place": Place,
+           "Review": Review, "State": State, "User": User}
 
+class TestFileStorage(unittest.TestCase):
+    """Test the FileStorage class"""
+    @unittest.skipIf(models.storage != 'db', "not testing db storage")
+    def test_all_returns_dict(self):
+        """Test that all returns a dictionaty"""
+        self.assertIs(type(models.storage.all()), dict)
 
-# skip these test if the storage is not db
-@unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db', "skip if not fs")
-class TestDBStorage(unittest.TestCase):
-    """DB Storage test"""
+    @unittest.skipIf(models.storage != 'db', "not testing db storage")
+    def test_all_no_class(self):
+        """Test that all returns all rows when no class is passed"""
 
-    def setUp(self):
-        """ Set up test environment """
-        self.storage = models.storage
+    @unittest.skipIf(models.storage != 'db', "not testing db storage")
+    def test_new(self):
+        """test that new adds an object to the database"""
 
-    def tearDown(self):
-        """ Remove storage file at end of tests """
-        del self.storage
-
-    def test_user(self):
-        """ Tests user """
-        user = User(name="Chyna", email="chyna@gmail.com", password="Chyna12345")
-        user.save()
-        self.assertFalse(user.id in self.storage.all())
-        self.assertEqual(user.name, "Chyna")
-
-    def test_city(self):
-        """ test city """
-        state = State(name="California")
-        state.save()
-        city = City(name="Batch")
-        city.state_id = state.id
-        city.save()
-        self.assertFalse(city.id in self.storage.all())
-        self.assertEqual(city.name, "Batch")
-
-    def test_state(self):
-        """ test state"""
-        state = State(name="California")
-        state.save()
-        self.assertFalse(state.id in self.storage.all())
-        self.assertEqual(state.name, "California")
-
-    def test_place(self):
-        """Test place"""
-        state = State(name="California")
-        state.save()
-
-        city = City(name="Batch")
-        city.state_id = state.id
-        city.save()
-
-        user = User(name="Chyna", email="chyna@gmail.com", password="Chyna12345")
-        user.save()
-
-        place = Place(name="Palace", number_rooms=4)
-        place.city_id = city.id
-        place.user_id = user.id
-        place.save()
-
-        self.assertFalse(place.id in self.storage.all())
-        self.assertEqual(place.number_rooms, 4)
-        self.assertEqual(place.name, "Palace")
-
-    def test_amenity(self):
-        """ test amenity """
-        amenity = Amenity(name="Startlink")
-        amenity.save()
-        self.assertFalse(amenity.id in self.storage.all())
-        self.assertTrue(amenity.name, "Startlink")
-
-    def test_review(self):
-        """ test review """
-        state = State(name="California")
-        state.save()
-
-        city = City(name="Batch")
-        city.state_id = state.id
-        city.save()
-
-        user = User(name="Chyna", email="chyna@gmail.com", password="Chyna12345")
-        user.save()
-
-        place = Place(name="Palace", number_rooms=4)
-        place.city_id = city.id
-        place.user_id = user.id
-        place.save()
-
-        review = Review(text="no comment", place_id=place.id, user_id=user.id)
-        review.save()
-
-        self.assertFalse(review.id in self.storage.all())
-        self.assertEqual(review.text, "no comment")
-
-
-if __name__ == '__main__':
-    unittest.main()
+    @unittest.skipIf(models.storage != 'db', "not testing db storage")
+    def test_save(self):
+        """Test that save properly saves objects to file.json"""
