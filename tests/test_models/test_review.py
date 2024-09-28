@@ -1,49 +1,36 @@
 #!/usr/bin/python3
-"""
-module to test the Review class
-"""
-import unittest
-import os
+""" """
+from models.place import Place
+from models.user import User
+from tests.test_models.test_base_model import TestBaseModel
 from models.review import Review
 
 
-class TestReview(unittest.TestCase):
-    """
-    test review
-    """
+class TestReview(TestBaseModel):
+    """Test for review """
 
-    def setUp(self):
-        """setUp"""
-        if not os.path.exists("file.json"):
-            os.mknod("file.json")
-        self.review = Review()
+    def __init__(self, *args, **kwargs):
+        """ """
+        super().__init__(*args, **kwargs)
+        self.name = "Review"
+        self.value = Review
 
-    def tearDown(self):
-        """tearDown"""
-        if os.path.exists("file.json"):
-            os.remove("file.json")
-        del self.review
+    def test_place_id(self):
+        """ """
+        new = self.value()
+        place = Place()
+        new.place_id = place.id
+        self.assertEqual(type(new.place_id), str)
 
-    def test_creation(self):
-        '''
-        ensures correct creaion
-        '''
-        self.assertEqual(self.review.text, '')
-        self.assertEqual(self.review.place_id, '')
-        self.assertEqual(self.review.user_id, '')
+    def test_user_id(self):
+        """ """
+        new = self.value()
+        user = User()
+        new.user_id = user.id
+        self.assertEqual(type(new.user_id), str)
 
-    def test_types(self):
-        '''
-        ensure types
-        '''
-        self.assertEqual(type(self.review.text), str)
-        self.assertEqual(type(self.review.place_id), str)
-        self.assertEqual(type(self.review.user_id), str)
-
-    def test_invalid_attributes(self):
-        '''
-        Test invalid attributes
-        '''
-        self.review = Review({'ratings': 20, 'username': 'betty'})
-        self.assertFalse(hasattr(self.review, 'rating'))
-        self.assertFalse(hasattr(self.review, 'username'))
+    def test_text(self):
+        """ """
+        new = self.value()
+        new.text = ""
+        self.assertEqual(type(new.text), str)

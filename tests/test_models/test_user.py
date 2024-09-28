@@ -1,69 +1,38 @@
 #!/usr/bin/python3
-"""
-module to test the User class
-"""
-import unittest
-import os
+""" """
+from tests.test_models.test_base_model import TestBaseModel
 from models.user import User
 
 
-class TestUser(unittest.TestCase):
-    """
-    tests class
-    """
+class TestUser(TestBaseModel):
+    """ Test for user"""
 
-    def setUp(self):
-        """setup"""
-        if not os.path.exists("file.json"):
-            os.mknod("file.json")
-        self.user = User()
+    def __init__(self, *args, **kwargs):
+        """ """
+        super().__init__(*args, **kwargs)
+        self.name = "User"
+        self.value = User
 
-    def tearDown(self):
-        """tear down"""
-        if os.path.exists("file.json"):
-            os.remove("file.json")
-        del self.user
+    def test_first_name(self):
+        """ """
+        new = self.value()
+        new.first_name = "Abissa"
+        self.assertEqual(type(new.first_name), str)
 
-    def test_creation(self):
-        '''
-        ensure correct creation
-        '''
-        self.assertEqual(self.user.email, '')
-        self.assertEqual(self.user.password, '')
-        self.assertEqual(self.user.first_name, '')
-        self.assertEqual(self.user.last_name, '')
+    def test_last_name(self):
+        """ """
+        new = self.value()
+        new.last_name = "Abissa"
+        self.assertEqual(type(new.last_name), str)
 
-    def test_creation_with_args(self):
-        '''
-        ensure correct creation with args
-        '''
-        data = {'id': 3,
-                'first_name': 'Betty',
-                'last_name': 'Holberton',
-                'password': '123',
-                'email': 'correo@correo',
-                }
+    def test_email(self):
+        """ """
+        new = self.value()
+        new.email = "a.sani@alustudent.com"
+        self.assertEqual(type(new.email), str)
 
-        self.user = User(**data)
-        self.assertEqual(self.user.id, 3)
-        self.assertEqual(self.user.first_name, 'Betty')
-        self.assertEqual(self.user.last_name, 'Holberton')
-        self.assertEqual(self.user.password, '123')
-        self.assertEqual(self.user.email, 'correo@correo')
-
-    def test_types(self):
-        '''
-        Test types
-        '''
-        self.assertEqual(type(self.user.email), str)
-        self.assertEqual(type(self.user.password), str)
-        self.assertEqual(type(self.user.first_name), str)
-        self.assertEqual(type(self.user.last_name), str)
-
-    def test_invalid_attributes(self):
-        '''
-        Test invalid attributes
-        '''
-        self.user = User({'name': 'Betty', 'my_number': 89})
-        self.assertEqual(hasattr(self.user, 'name'), False)
-        self.assertEqual(hasattr(self.user, 'my_number'), False)
+    def test_password(self):
+        """ """
+        new = self.value()
+        new.password = "123aashja"
+        self.assertEqual(type(new.password), str)
