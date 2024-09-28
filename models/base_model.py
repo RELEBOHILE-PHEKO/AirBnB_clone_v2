@@ -24,7 +24,7 @@ class BaseModel:
         self.id = str(uuid.uuid4())
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
-        
+
         if kwargs:
             for k, v in kwargs.items():
                 if k in ('created_at', 'updated_at'):
@@ -36,7 +36,8 @@ class BaseModel:
         """Return a string representation of the instance."""
         cls = (str(type(self)).split('.')[-1]).split('\'')[0]
         filtered_dict = {
-            k: v for k, v in self.__dict__.copy().items() if k != '_sa_instance_state'
+            k: v for k, v in self.__dict__.copy().items() 
+            if k != '_sa_instance_state'
         }
         return '[{}] ({}) {}'.format(cls, self.id, filtered_dict)
 
