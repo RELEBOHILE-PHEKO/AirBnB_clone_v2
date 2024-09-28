@@ -9,12 +9,11 @@ from sqlalchemy.orm import relationship
 
 
 place_amenity = Table(
-    "place_amenity",
-    Base.metadata,
-    Column("place_id", String(60), ForeignKey("places.id")),
-    Column("amenity_id", String(60), ForeignKey("amenities.id"))
-)
-
+        "place_amenity",
+        Base.metadata,
+        Column("place_id", String(60), ForeignKey("places.id")),
+        Column("amenity_id", String(60), ForeignKey("amenities.id"))
+        )
 
 class Place(BaseModel, Base):
     """A place to stay."""
@@ -34,26 +33,22 @@ class Place(BaseModel, Base):
 
     if models.storage_type == "db":
         reviews = relationship("Review", backref="place", cascade="delete")
-        amenities = relationship(
-            "Amenity", secondary="place_amenity",
-            back_populates="place_amenities", viewonly=False
-        )
+        amenities = relationship("Amenity", secondary="place_amenity",
+                back_populates="place_amenities", viewonly=False)
     else:
         @property
         def reviews(self):
             """Review getter."""
             return [o for o in models.storage.all(Review)
                     if o.place_id == self.id]
-
         @property
         def amenities(self):
-            """Amenities getter."""
-            return [o for o in models.storage.all(Amenity)
+            """Amenties getter"""
+            return [o for o in models.all(Amenity)
                     if o.place_id == self.id]
-
         @amenities.setter
         def amenities(self, obj):
-            """Amenities setter."""
+            """Amenities setter"""
             if isinstance(obj, Amenity):
                 self.amenity_ids.append(obj.id)
 
