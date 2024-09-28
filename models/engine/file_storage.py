@@ -14,7 +14,11 @@ class FileStorage:
         If cls is specified, returns objects of that type.
         """
         if cls is not None:
-            filtered_objects = {key: obj for key, obj in FileStorage.__objects.items() if isinstance(obj, cls)}
+            filtered_objects = {
+                key: obj for key,
+                obj in FileStorage.__objects.items() if isinstance(
+                    obj,
+                    cls)}
             return filtered_objects
         return FileStorage.__objects
 
@@ -42,16 +46,16 @@ class FileStorage:
         from models.review import Review
 
         classes = {
-                    'BaseModel': BaseModel, 'User': User, 'Place': Place,
-                    'State': State, 'City': City, 'Amenity': Amenity,
-                    'Review': Review
-                  }
+            'BaseModel': BaseModel, 'User': User, 'Place': Place,
+            'State': State, 'City': City, 'Amenity': Amenity,
+            'Review': Review
+        }
         try:
             temp = {}
             with open(FileStorage.__file_path, 'r') as f:
                 temp = json.load(f)
                 for key, val in temp.items():
-                        self.all()[key] = classes[val['__class__']](**val)
+                    self.all()[key] = classes[val['__class__']](**val)
         except FileNotFoundError:
             pass
 
