@@ -1,5 +1,8 @@
+#!/usr/bin/python3
+
 import unittest
 import MySQLdb
+
 
 class TestStateStorage(unittest.TestCase):
     @classmethod
@@ -37,9 +40,11 @@ class TestStateStorage(unittest.TestCase):
         # Your test code here
         pass
 
+
 def is_mysql_storage():
     # Implement logic to check if MySQL storage is being used
     return True  # or False based on your condition
+
 
 if __name__ == '__main__':
     unittest.main()
