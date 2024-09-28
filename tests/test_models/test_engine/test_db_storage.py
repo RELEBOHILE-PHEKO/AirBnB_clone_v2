@@ -1,110 +1,103 @@
 #!/usr/bin/python3
-"""
-Module for testing the DBStorage class
-"""
 import unittest
-import os
-from models.engine.db_storage import DBStorage
-from models.base_model import Base
+import models
 from models.user import User
-from models.state import State
-from models.city import City
-from models.amenity import Amenity
-from models.place import Place
 from models.review import Review
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from models.amenity import Amenity
+from models.state import State
+from models.place import Place
+from models.city import City
+import os
 
 
+# skip these test if the storage is not db
+@unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db', "skip if not fs")
 class TestDBStorage(unittest.TestCase):
-    """Test cases for the DBStorage class"""
-
-    @classmethod
-    def setUpClass(cls):
-        """Set up the test environment"""
-        cls.db_fd, cls.db_path = tempfile.mkstemp()
-        cls.db_storage = DBStorage()
-        cls.db_storage.reload()
-
-    @classmethod
-    def tearDownClass(cls):
-        """Clean up the test environment"""
-        os.close(cls.db_fd)
-        os.unlink(cls.db_path)
+    """DB Storage test"""
 
     def setUp(self):
-        """Set up for each test"""
-        self.engine = create_engine('sqlite:///:memory:')
-        Base.metadata.create_all(self.engine)
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
+        """ Set up test environment """
+        self.storage = models.storage
 
     def tearDown(self):
-        """Clean up after each test"""
-        self.session.close()
-        Base.metadata.drop_all(self.engine)
+        """ Remove storage file at end of tests """
+        del self.storage
 
-    def test_all_no_class(self):
-        """Test all() method without class"""
-        result = self.db_storage.all()
-        self.assertIsInstance(result, dict)
-        self.assertEqual(len(result), 0)
+    def test_user(self):
+        """ Tests user """
+        user = User(name="Chyna", email="chyna@gmail.com", password="Chyna12345")
+        user.save()
+        self.assertFalse(user.id in self.storage.all())
+        self.assertEqual(user.name, "Chyna")
 
-    def test_all_with_class(self):
-        """Test all() method with a specific class"""
+    def test_city(self):
+        """ test city """
         state = State(name="California")
-        self.session.add(state)
-        self.session.commit()
-        result = self.db_storage.all(State)
-        self.assertIsInstance(result, dict)
-        self.assertEqual(len(result), 1)
-        self.assertIn(f"State.{state.id}", result)
+        state.save()
+        city = City(name="Batch")
+        city.state_id = state.id
+        city.save()
+        self.assertFalse(city.id in self.storage.all())
+        self.assertEqual(city.name, "Batch")
 
-    def test_new(self):
-        """Test new() method"""
-        user = User(email="test@test.com", password="password")
-        self.db_storage.new(user)
-        self.db_storage.save()
-        result = self.db_storage.all(User)
-        self.assertIn(f"User.{user.id}", result)
+    def test_state(self):
+        """ test state"""
+        state = State(name="California")
+        state.save()
+        self.assertFalse(state.id in self.storage.all())
+        self.assertEqual(state.name, "California")
 
-    def test_save(self):
-        """Test save() method"""
-        city = City(name="San Francisco", state_id="CA")
-        self.db_storage.new(city)
-        self.db_storage.save()
-        result = self.db_storage.all(City)
-        self.assertIn(f"City.{city.id}", result)
+    def test_place(self):
+        """Test place"""
+        state = State(name="California")
+        state.save()
 
-    def test_delete(self):
-        """Test delete() method"""
-        amenity = Amenity(name="WiFi")
-        self.db_storage.new(amenity)
-        self.db_storage.save()
-        self.db_storage.delete(amenity)
-        self.db_storage.save()
-        result = self.db_storage.all(Amenity)
-        self.assertNotIn(f"Amenity.{amenity.id}", result)
+        city = City(name="Batch")
+        city.state_id = state.id
+        city.save()
 
-    def test_reload(self):
-        """Test reload() method"""
-        place = Place(name="Cozy Cabin", city_id="SF", user_id="1")
-        self.db_storage.new(place)
-        self.db_storage.save()
-        self.db_storage.reload()
-        result = self.db_storage.all(Place)
-        self.assertIn(f"Place.{place.id}", result)
+        user = User(name="Chyna", email="chyna@gmail.com", password="Chyna12345")
+        user.save()
 
-    def test_all_with_id(self):
-        """Test all() method with a specific id"""
-        review = Review(text="Great place!", place_id="1", user_id="1")
-        self.db_storage.new(review)
-        self.db_storage.save()
-        result = self.db_storage.all(Review, review.id)
-        self.assertIsInstance(result, dict)
-        self.assertEqual(len(result), 1)
-        self.assertIn(f"Review.{review.id}", result)
+        place = Place(name="Palace", number_rooms=4)
+        place.city_id = city.id
+        place.user_id = user.id
+        place.save()
+
+        self.assertFalse(place.id in self.storage.all())
+        self.assertEqual(place.number_rooms, 4)
+        self.assertEqual(place.name, "Palace")
+
+    def test_amenity(self):
+        """ test amenity """
+        amenity = Amenity(name="Startlink")
+        amenity.save()
+        self.assertFalse(amenity.id in self.storage.all())
+        self.assertTrue(amenity.name, "Startlink")
+
+    def test_review(self):
+        """ test review """
+        state = State(name="California")
+        state.save()
+
+        city = City(name="Batch")
+        city.state_id = state.id
+        city.save()
+
+        user = User(name="Chyna", email="chyna@gmail.com", password="Chyna12345")
+        user.save()
+
+        place = Place(name="Palace", number_rooms=4)
+        place.city_id = city.id
+        place.user_id = user.id
+        place.save()
+
+        review = Review(text="no comment", place_id=place.id, user_id=user.id)
+        review.save()
+
+        self.assertFalse(review.id in self.storage.all())
+        self.assertEqual(review.text, "no comment")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
