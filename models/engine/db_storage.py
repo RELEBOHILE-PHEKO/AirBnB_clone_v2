@@ -13,7 +13,6 @@ from models.place import Place
 from models.review import Review
 import os
 
-
 class DBStorage:
     """The class for database storage."""
     __engine = None
@@ -35,11 +34,11 @@ class DBStorage:
     def all(self, cls=None, id=None):
         """
         Query the current database session.
-        
+
         Args:
             cls (class, optional): The class to query.
             id (str, optional): The id of the object to retrieve.
-        
+
         Returns:
             dict: A dictionary of objects.
         """
