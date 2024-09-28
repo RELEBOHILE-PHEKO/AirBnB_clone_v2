@@ -1,6 +1,13 @@
 #!/usr/bin/python3
 """This module defines a class to manage file storage for hbnb clone"""
 import json
+from models.base_model import BaseModel
+from models.user import User
+from models.place import Place
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.review import Review
 
 
 class FileStorage:
@@ -8,6 +15,7 @@ class FileStorage:
     __file_path = 'file.json'
     __objects = {}
 
+<<<<<<< HEAD
     def all(self, cls=None):
         """
         Returns a dictionary of models currently in storage.
@@ -21,10 +29,25 @@ class FileStorage:
                     cls)}
             return filtered_objects
         return FileStorage.__objects
+=======
+    def all(self, cls=None, id=None):
+        """Returns a dictionary of models currently in storage"""
+        objs = FileStorage.__objects
+        if cls is None:
+            return objs
+        if id is not None:
+            return {
+                    k: v for (k, v) in objs.items()
+                    if k == cls.__name__ + "." + id
+                }
+        return {
+                k: v for (k, v) in objs.items()
+                if k.startswith(cls.__name__ + '.')
+            }
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
-        self.all().update({obj.to_dict()['__class__'] + '.' + obj.id: obj})
+        self.__objects.update({obj.to_dict()['__class__'] + '.' + obj.id: obj})
 
     def save(self):
         """Saves storage dictionary to file"""
@@ -37,13 +60,6 @@ class FileStorage:
 
     def reload(self):
         """Loads storage dictionary from file"""
-        from models.base_model import BaseModel
-        from models.user import User
-        from models.place import Place
-        from models.state import State
-        from models.city import City
-        from models.amenity import Amenity
-        from models.review import Review
 
         classes = {
             'BaseModel': BaseModel, 'User': User, 'Place': Place,
@@ -60,8 +76,11 @@ class FileStorage:
             pass
 
     def delete(self, obj=None):
-        """Deletes obj from __objects if it's inside"""
-        if obj is not None:
-            key = obj.to_dict()['__class__'] + '.' + obj.id
-            if key in FileStorage.__objects:
-                del FileStorage.__objects[key]
+        """Delete param obj from __objects."""
+        if obj is None:
+            return
+        del FileStorage.__objects[obj.to_dict()['__class__'] + '.' + obj.id]
+
+    def close(self):
+        """call reload() method for deserializing the JSON file to objects"""
+        self.reload()
