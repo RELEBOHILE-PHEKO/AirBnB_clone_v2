@@ -36,7 +36,7 @@ class BaseModel:
         """Return a string representation of the instance."""
         cls = (str(type(self)).split('.')[-1]).split('\'')[0]
         filtered_dict = {
-            k: v for k, v in self.__dict__.copy().items() 
+            k: v for k, v in self.__dict__.copy().items()
             if k != '_sa_instance_state'
         }
         return '[{}] ({}) {}'.format(cls, self.id, filtered_dict)
