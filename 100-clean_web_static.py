@@ -25,6 +25,8 @@ def do_clean(number=0):
     number = 1 if int(number) == 0 else int(number)
 
     archives = sorted(os.listdir("versions"))
+    
+    # Remove old archives
     [archives.pop() for _ in range(number)]
     
     with lcd("versions"):
@@ -33,5 +35,7 @@ def do_clean(number=0):
     with cd("/data/web_static/releases"):
         archives = run("ls -tr").split()
         archives = [a for a in archives if "web_static_" in a]
+        
+        # Remove old web_static releases
         [archives.pop() for _ in range(number)]
         [run("rm -rf ./{}".format(a)) for a in archives]
