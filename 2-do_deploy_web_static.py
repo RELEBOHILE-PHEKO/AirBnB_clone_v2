@@ -15,8 +15,8 @@ env.hosts = ['52.23.237.49', '54.205.189.207']
 def do_clean(number=0):
     """Delete out-of-date archives.
 
-    This function removes old archives from the local versions
-    directory and the remote server's web_static releases.
+    This function removes old archives from the local 'versions' directory
+    and the remote server's web_static releases.
 
     Args:
         number (int): The number of archives to keep. 
@@ -24,8 +24,10 @@ def do_clean(number=0):
             If number is 2, keeps the most and second-most recent archives,
             etc. Defaults to 0.
 
-    Returns:
-        None
+    The function does not return a value.
+    
+    It changes the working directory to 'versions' locally and to 
+    '/data/web_static/releases' remotely.
     """
     number = 1 if int(number) == 0 else int(number)
 
