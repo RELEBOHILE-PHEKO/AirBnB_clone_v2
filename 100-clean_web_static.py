@@ -3,7 +3,8 @@
 Deletes out-of-date archives.
 
 Usage:
-    fab -f 100-clean_web_static.py do_clean:number=2 -i ssh-key -u ubuntu > /dev/null 2>&1
+    fab -f 100-clean_web_static.py do_clean:number=2 -i ssh-key -u ubuntu
+    > /dev/null 2>&1
 """
 
 import os
@@ -25,17 +26,17 @@ def do_clean(number=0):
     number = 1 if int(number) == 0 else int(number)
 
     archives = sorted(os.listdir("versions"))
-    
+
     # Remove old archives
     [archives.pop() for _ in range(number)]
-    
+
     with lcd("versions"):
         [local("rm ./{}".format(a)) for a in archives]
 
     with cd("/data/web_static/releases"):
         archives = run("ls -tr").split()
         archives = [a for a in archives if "web_static_" in a]
-        
+
         # Remove old web_static releases
         [archives.pop() for _ in range(number)]
         [run("rm -rf ./{}".format(a)) for a in archives]
