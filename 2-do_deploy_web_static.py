@@ -1,49 +1,42 @@
 #!/usr/bin/python3
-# Fabfile to distribute an archive to a web server.
-import os.path
-from fabric.api import env
-from fabric.api import put
-from fabric.api import run
+"""
+Deletes out-of-date archives.
 
-env.hosts = ["52.23.237.49", "54.205.189.207"]
+Usage:
+    fab -f 100-clean_web_static.py do_clean:number=2 -i ssh-key -u ubuntu 
+    > /dev/null 2>&1
+"""
+
+import os
+from fabric.api import env, local, run, cd, lcd
+
+env.hosts = ['52.23.237.49', '54.205.189.207']
 
 
-def do_deploy(archive_path):
-    """Distributes an archive to a web server.
+def do_clean(number=0):
+    """Delete out-of-date archives.
 
     Args:
-        archive_path (str): The path of the archive to distribute.
-    Returns:
-        If the file doesn't exist at archive_path or an error occurs - False.
-        Otherwise - True.
-    """
-    if os.path.isfile(archive_path) is False:
-        return False
-    file = archive_path.split("/")[-1]
-    name = file.split(".")[0]
+        number (int): The number of archives to keep.
 
-    if put(archive_path, "/tmp/{}".format(file)).failed is True:
-        return False
-    if run("rm -rf /data/web_static/releases/{}/".
-           format(name)).failed is True:
-        return False
-    if run("mkdir -p /data/web_static/releases/{}/".
-           format(name)).failed is True:
-        return False
-    if run("tar -xzf /tmp/{} -C /data/web_static/releases/{}/".
-           format(file, name)).failed is True:
-        return False
-    if run("rm /tmp/{}".format(file)).failed is True:
-        return False
-    if run("mv /data/web_static/releases/{}/web_static/* "
-           "/data/web_static/releases/{}/".format(name, name)).failed is True:
-        return False
-    if run("rm -rf /data/web_static/releases/{}/web_static".
-           format(name)).failed is True:
-        return False
-    if run("rm -rf /data/web_static/current").failed is True:
-        return False
-    if run("ln -s /data/web_static/releases/{}/ /data/web_static/current".
-           format(name)).failed is True:
-        return False
-    return True
+    If number is 0 or 1, keeps only the most recent archive. If
+    number is 2, keeps the most and second-most recent archives,
+    etc.
+    """
+    number = 1 if int(number) == 0 else int(number)
+
+    archives = sorted(os.listdir("versions"))
+
+    # Remove old archives
+    [archives.pop() for _ in range(number)]
+    
+    with lcd("versions"):
+        [local("rm ./{}".format(a)) for a in archives]
+
+    with cd("/data/web_static/releases"):
+        archives = run("ls -tr").split()
+        archives = [a for a in archives if "web_static_" in a]
+
+        # Remove old web_static releases
+        [archives.pop() for _ in range(number)]
+        [run("rm -rf ./{}".format(a)) for a in archives]
