@@ -1,9 +1,5 @@
 #!/usr/bin/python3
-"""
-Deletes out-of-date archives.
-Usage: fab -f 100-clean_web_static.py do_clean:number=2 -i ssh-key -u ubuntu > /dev/null 2>&1
-"""
-
+"""Fabric function sends archived static site to webservers"""
 import os
 from fabric.api import env, local, run, cd, lcd
 
